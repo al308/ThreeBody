@@ -16,6 +16,15 @@ function openSettings() {
         settingsForm.appendChild(bodySettings);
     });
 
+    // Add settings for trail length and opacity decay
+    const trailSettings = document.createElement('div');
+    trailSettings.innerHTML = `
+        <h3>Trail Settings</h3>
+        <label>Max Trail Length: <input type="number" id="trailLength" step="1" value="${maxTrailLength}"></label><br>
+        <label>Trail Opacity Decay: <input type="number" id="trailOpacityDecay" step="0.01" value="${trailOpacityDecay}"></label><br>
+    `;
+    settingsForm.appendChild(trailSettings);
+
     modal.style.display = "block";
 }
 
@@ -28,6 +37,10 @@ function applySettings() {
         body.vy = parseFloat(document.getElementById(`velY${index}`).value);
         body.escaped = false; // Reset escaped status when settings are applied
     });
+
+    // Apply trail settings
+    maxTrailLength = parseInt(document.getElementById('trailLength').value);
+    trailOpacityDecay = parseFloat(document.getElementById('trailOpacityDecay').value);
 
     const modal = document.getElementById('settingsModal');
     modal.style.display = "none";

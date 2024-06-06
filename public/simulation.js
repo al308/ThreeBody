@@ -5,11 +5,16 @@ let bodies = [];
 let running = false;
 let timeFactor = 1.0;
 let scaleFactor = 1.0;
+let autoStop = false;
+let autoStopTriggered = false;
 const colors = ['#e74c3c', '#8e44ad', '#f39c12'];
 let selectedBody = null;
 let isDragging = false;
 let offsetX, offsetY;
 const G = 1; // Gravitational constant for our simulation
+let trails = [];
+let maxTrailLength = 100; // Increased default trail length
+let trailOpacityDecay = 0.01; // Adjusted opacity decay for better visibility
 
 class Body {
     constructor(mass, x, y, vx, vy, color) {
@@ -48,6 +53,11 @@ class Body {
                 const distance = Math.sqrt(dx * dx + dy * dy);
                 const escapeVelocity = Math.sqrt((2 * G * body.mass) / distance);
                 totalEscapeVelocity += escapeVelocity;
+                if (distance < 10 && autoStop) {
+                    running = false;
+                    autoStopTriggered = true;
+                    document.getElementById('autoStopBtn').classList.add('triggered');
+                }
             }
         });
         const currentVelocity = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
@@ -137,61 +147,41 @@ function calculateGravitationalForce(b1, b2) {
 }
 
 function initBodies(preset) {
-    switch (preset) {
-        case 1:
-            // Hierarchical System
-            bodies = [
-                new Body(1000, -100, 0, 0, 1.5, colors[0]), // Body 1
-                new Body(1000, 100, 0, 0, -1.5, colors[1]), // Body 2
-                new Body(1, 0, 300, 2, 0, colors[2]) // Body 3 (much lighter and far away)
-            ];
-            break;
-        case 2:
-            // Equilateral Triangle
-            const mass = 1000;
-            const sideLength = 300;
-            const height = Math.sqrt(3) / 2 * sideLength;
-            const speed = Math.sqrt(G * mass / (sideLength / Math.sqrt(3)));
-            bodies = [
-                new Body(mass, -sideLength / 2, 0, speed, 0, colors[0]), // Body 1
-                new Body(mass, sideLength / 2, 0, -speed, 0, colors[1]), // Body 2
-                new Body(mass, 0, height, 0, -speed, colors[2]) // Body 3
-            ];
-            break;
-        case 3:
-            // Binary with Distant Orbit (Adjusted)
-            const binarySpeed = Math.sqrt(G * 1000 / 100);
-            bodies = [
-                new Body(1000, -100, 0, 0, binarySpeed, colors[0]), // Body 1
-                new Body(1000, 100, 0, 0, -binarySpeed, colors[1]), // Body 2
-                new Body(100, 0, 500, 0.75, 0, colors[2]) // Body 3
-            ];
-            break;
-        case 4:
-            // Circular Orbits
-            bodies = [
-                new Body(1000, 0, 0, 0, 0, colors[0]), // Central Body
-                new Body(10, 150, 0, 0, 1.5, colors[1]), // Orbiting Body 1
-                new Body(10, 0, 200, -1, 0, colors[2]) // Orbiting Body 2
-            ];
-            break;
-        case 5:
-            // Chaotic Start
-            bodies = [
-                new Body(1000, Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2 - 1, Math.random() * 2 - 1, colors[0]),
-                new Body(1000, Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2 - 1, Math.random() * 2 - 1, colors[1]),
-                new Body(1000, Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2 - 1, Math.random() * 2 - 1, colors[2])
-            ];
-            break;
-        default:
-            // Default (Hierarchical System)
-            bodies = [
-                new Body(1000, -100, 0, 0, 1.5, colors[0]), // Body 1
-                new Body(1000, 100, 0, 0, -1.5, colors[1]), // Body 2
-                new Body(1, 0, 300, 2, 0, colors[2]) // Body 3 (much lighter and far away)
-            ];
-            break;
-    }
+    const presets = [
+        // Stable Orbit 1
+        [
+            { mass: 1000, x: -100, y: 0, vx: 0, vy: 1.5, color: colors[0] },
+            { mass: 1000, x: 100, y: 0, vx: 0, vy: -1.5, color: colors[1] },
+            { mass: 1000, x: 0, y: 173, vx: 1.5, vy: 0, color: colors[2] }
+        ],
+        // Stable Orbit 2
+        [
+            { mass: 1000, x: -150, y: 0, vx: 0, vy: 1.2, color: colors[0] },
+            { mass: 1000, x: 150, y: 0, vx: 0, vy: -1.2, color: colors[1] },
+            { mass: 500, x: 0, y: 250, vx: 1, vy: 0, color: colors[2] }
+        ],
+        // Stable Orbit 3
+        [
+            { mass: 800, x: -200, y: 0, vx: 0, vy: 1.0, color: colors[0] },
+            { mass: 800, x: 200, y: 0, vx: 0, vy: -1.0, color: colors[1] },
+            { mass: 600, x: 0, y: 300, vx: 0.8, vy: 0, color: colors[2] }
+        ],
+        // Stable Orbit 4
+        [
+            { mass: 1200, x: -100, y: 0, vx: 0, vy: 1.4, color: colors[0] },
+            { mass: 1200, x: 100, y: 0, vx: 0, vy: -1.4, color: colors[1] },
+            { mass: 800, x: 0, y: 200, vx: 1.2, vy: 0, color: colors[2] }
+        ],
+        // Stable Orbit 5
+        [
+            { mass: 1500, x: -250, y: 0, vx: 0, vy: 0.9, color: colors[0] },
+            { mass: 1500, x: 250, y: 0, vx: 0, vy: -0.9, color: colors[1] },
+            { mass: 700, x: 0, y: 350, vx: 0.6, vy: 0, color: colors[2] }
+        ]
+    ];
+
+    bodies = presets[preset - 1].map(p => new Body(p.mass, p.x, p.y, p.vx, p.vy, p.color));
+    trails = bodies.map(() => []); // Initialize trails for each body
     zoomOutAndCenter();
     console.log(bodies); // Log the bodies to ensure they are initialized correctly
 }
@@ -210,16 +200,53 @@ function updateSimulation() {
         for (const body of bodies) {
             body.update(0.1 * timeFactor);
         }
+
+        // Update trails only when running
+        bodies.forEach((body, index) => {
+            trails[index].push({ x: body.x, y: body.y, opacity: 1 });
+            if (trails[index].length > maxTrailLength) {
+                trails[index].shift();
+            }
+        });
     }
 }
 
 function drawSimulation() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawTrails();
     for (const body of bodies) {
         body.draw(ctx);
     }
     document.getElementById('speedDisplay').textContent = `Speed: ${timeFactor.toFixed(1)}`;
     document.getElementById('sizeDisplay').textContent = `Size: ${(canvas.width * scaleFactor).toFixed(0)} x ${(canvas.height * scaleFactor).toFixed(0)}`;
+}
+
+function drawTrails() {
+    trails.forEach((trail, index) => {
+        trail.forEach((point, i) => {
+            const nextPoint = trail[i + 1];
+            if (nextPoint) {
+                const screenX = (point.x / scaleFactor) + canvas.width / 2;
+                const screenY = (point.y / scaleFactor) + canvas.height / 2;
+                const nextScreenX = (nextPoint.x / scaleFactor) + canvas.width / 2;
+                const nextScreenY = (nextPoint.y / scaleFactor) + canvas.height / 2;
+                ctx.beginPath();
+                ctx.moveTo(screenX, screenY);
+                ctx.lineTo(nextScreenX, nextScreenY);
+                ctx.strokeStyle = `rgba(${hexToRgb(colors[index])}, ${point.opacity})`;
+                ctx.stroke();
+                point.opacity -= trailOpacityDecay;
+            }
+        });
+    });
+}
+
+function hexToRgb(hex) {
+    const bigint = parseInt(hex.slice(1), 16);
+    const r = (bigint >> 16) & 255;
+    const g = (bigint >> 8) & 255;
+    const b = bigint & 255;
+    return `${r},${g},${b}`;
 }
 
 function loop() {
@@ -257,102 +284,6 @@ function zoomIn() {
         body.escaped = false;
     });
 }
-
-canvas.addEventListener('mousedown', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    for (const body of bodies) {
-        if (body.isClicked(mouseX, mouseY)) {
-            selectedBody = body;
-            offsetX = mouseX - ((body.x / scaleFactor) + canvas.width / 2);
-            offsetY = mouseY - ((body.y / scaleFactor) + canvas.height / 2);
-            isDragging = true;
-            break;
-        }
-    }
-});
-
-canvas.addEventListener('mousemove', (e) => {
-    if (isDragging && selectedBody) {
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        selectedBody.x = (mouseX - offsetX - canvas.width / 2) * scaleFactor;
-        selectedBody.y = (mouseY - offsetY - canvas.height / 2) * scaleFactor;
-    }
-});
-
-canvas.addEventListener('mouseup', () => {
-    isDragging = false;
-    selectedBody = null;
-});
-
-canvas.addEventListener('mouseleave', () => {
-    isDragging = false;
-    selectedBody = null;
-});
-
-document.getElementById('startStopBtn').addEventListener('click', () => {
-    running = !running;
-    document.getElementById('startStopBtn').innerHTML = running ? '<i class="fas fa-pause"></i>' : '<i class="fas fa-play"></i>';
-});
-
-document.getElementById('resetBtn').addEventListener('click', () => {
-    bodies.forEach(body => {
-        body.x = Math.random() * canvas.width;
-        body.y = Math.random() * canvas.height;
-        body.vx = Math.random() * 2 - 1;
-        body.vy = Math.random() * 2 - 1;
-        body.escaped = false;
-    });
-    zoomOutAndCenter();
-});
-
-document.getElementById('speedUpBtn').addEventListener('click', () => {
-    timeFactor += 0.1;
-});
-
-document.getElementById('speedDownBtn').addEventListener('click', () => {
-    timeFactor = Math.max(0.1, timeFactor - 0.1);
-});
-
-document.getElementById('speedUp10xBtn').addEventListener('click', () => {
-    timeFactor += 1;
-});
-
-document.getElementById('speedDown10xBtn').addEventListener('click', () => {
-    timeFactor = Math.max(0.1, timeFactor - 1);
-});
-
-document.getElementById('zoomOutBtn').addEventListener('click', () => {
-    zoomOutAndCenter();
-});
-
-document.getElementById('zoomInBtn').addEventListener('click', () => {
-    zoomIn();
-});
-
-// Preset Buttons
-document.getElementById('preset1Btn').addEventListener('click', () => {
-    initBodies(1);
-});
-
-document.getElementById('preset2Btn').addEventListener('click', () => {
-    initBodies(2);
-});
-
-document.getElementById('preset3Btn').addEventListener('click', () => {
-    initBodies(3);
-});
-
-document.getElementById('preset4Btn').addEventListener('click', () => {
-    initBodies(4);
-});
-
-document.getElementById('preset5Btn').addEventListener('click', () => {
-    initBodies(5);
-});
 
 initBodies(1);
 loop();
