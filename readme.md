@@ -13,6 +13,8 @@ This project simulates the three-body problem using HTML, CSS, and JavaScript. T
 - **Zoom In/Out**: Adjust the view to show all bodies or zoom in for a closer look.
 - **Simulated Canvas Size**: Display the simulated size of the canvas, which changes with zoom levels.
 
+![Screenshot](doc/images/screenshot.png)
+
 ## Controls
 
 - **Start/Stop Simulation**: Press the start/stop button to toggle the simulation.
