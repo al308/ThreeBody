@@ -4,9 +4,11 @@ const ctx = canvas.getContext('2d');
 let bodies = [];
 let running = false;
 let timeFactor = 1.0;
+let deltaT = 0.1;
 let scaleFactor = 1.0;
 let autoStop = false;
 let autoStopTriggered = false;
+let boundingBox = false;
 const colors = ['#e74c3c', '#8e44ad', '#f39c12'];
 let selectedBody = null;
 let isDragging = false;
@@ -42,6 +44,22 @@ class Body {
         this.ax = 0;
         this.ay = 0;
         this.checkEscape();
+
+        // Handle bounding box collisions
+        if (boundingBox) {
+            const screenX = (this.x / scaleFactor) + canvas.width / 2;
+            const screenY = (this.y / scaleFactor) + canvas.height / 2;
+
+            if (screenX <= 0 || screenX >= canvas.width) {
+                this.vx *= -1;
+                this.x = (screenX <= 0) ? -canvas.width / 2 * scaleFactor : canvas.width / 2 * scaleFactor;
+            }
+
+            if (screenY <= 0 || screenY >= canvas.height) {
+                this.vy *= -1;
+                this.y = (screenY <= 0) ? -canvas.height / 2 * scaleFactor : canvas.height / 2 * scaleFactor;
+            }
+        }
     }
 
     checkEscape() {
@@ -65,7 +83,8 @@ class Body {
     }
 
     draw(ctx) {
-        const radius = Math.sqrt(this.mass / 1000) * 10 / scaleFactor; // Adjust size based on mass and scale
+        // Adjust size based on mass and ensure it is within the specified range
+        const radius = Math.min(100, Math.max(2, Math.sqrt(this.mass / 1000) * 10 / scaleFactor));
         const screenX = (this.x / scaleFactor) + canvas.width / 2;
         const screenY = (this.y / scaleFactor) + canvas.height / 2;
         if (screenX > 0 && screenX < canvas.width && screenY > 0 && screenY < canvas.height) {
@@ -147,40 +166,8 @@ function calculateGravitationalForce(b1, b2) {
 }
 
 function initBodies(preset) {
-    const presets = [
-        // Stable Orbit 1
-        [
-            { mass: 1000, x: -100, y: 0, vx: 0, vy: 1.5, color: colors[0] },
-            { mass: 1000, x: 100, y: 0, vx: 0, vy: -1.5, color: colors[1] },
-            { mass: 1000, x: 0, y: 173, vx: 1.5, vy: 0, color: colors[2] }
-        ],
-        // Stable Orbit 2
-        [
-            { mass: 1000, x: -150, y: 0, vx: 0, vy: 1.2, color: colors[0] },
-            { mass: 1000, x: 150, y: 0, vx: 0, vy: -1.2, color: colors[1] },
-            { mass: 500, x: 0, y: 250, vx: 1, vy: 0, color: colors[2] }
-        ],
-        // Stable Orbit 3
-        [
-            { mass: 800, x: -200, y: 0, vx: 0, vy: 1.0, color: colors[0] },
-            { mass: 800, x: 200, y: 0, vx: 0, vy: -1.0, color: colors[1] },
-            { mass: 600, x: 0, y: 300, vx: 0.8, vy: 0, color: colors[2] }
-        ],
-        // Stable Orbit 4
-        [
-            { mass: 1200, x: -100, y: 0, vx: 0, vy: 1.4, color: colors[0] },
-            { mass: 1200, x: 100, y: 0, vx: 0, vy: -1.4, color: colors[1] },
-            { mass: 800, x: 0, y: 200, vx: 1.2, vy: 0, color: colors[2] }
-        ],
-        // Stable Orbit 5
-        [
-            { mass: 1500, x: -250, y: 0, vx: 0, vy: 0.9, color: colors[0] },
-            { mass: 1500, x: 250, y: 0, vx: 0, vy: -0.9, color: colors[1] },
-            { mass: 700, x: 0, y: 350, vx: 0.6, vy: 0, color: colors[2] }
-        ]
-    ];
-
-    bodies = presets[preset - 1].map(p => new Body(p.mass, p.x, p.y, p.vx, p.vy, p.color));
+    const bodiesConfig = presets[preset - 1];
+    bodies = bodiesConfig.map(p => new Body(p.mass, p.x, p.y, p.vx, p.vy, p.color));
     trails = bodies.map(() => []); // Initialize trails for each body
     zoomOutAndCenter();
     console.log(bodies); // Log the bodies to ensure they are initialized correctly
@@ -198,7 +185,7 @@ function updateSimulation() {
         }
 
         for (const body of bodies) {
-            body.update(0.1 * timeFactor);
+            body.update(deltaT * timeFactor); // Use deltaT for updates
         }
 
         // Update trails only when running
@@ -218,6 +205,7 @@ function drawSimulation() {
         body.draw(ctx);
     }
     document.getElementById('speedDisplay').textContent = `Speed: ${timeFactor.toFixed(1)}`;
+    document.getElementById('deltaTDisplay').textContent = `Delta T: ${deltaT.toFixed(3)}`;
     document.getElementById('sizeDisplay').textContent = `Size: ${(canvas.width * scaleFactor).toFixed(0)} x ${(canvas.height * scaleFactor).toFixed(0)}`;
 }
 
@@ -285,5 +273,6 @@ function zoomIn() {
     });
 }
 
+// Initialize the simulation with the first preset
 initBodies(1);
 loop();

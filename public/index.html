@@ -22,7 +22,9 @@
             <button id="speedUp10xBtn" title="Speed Up 10x"><i class="fas fa-fast-forward"></i></button>
             <button id="speedDown10xBtn" title="Slow Down 10x"><i class="fas fa-fast-backward"></i></button>
             <button id="autoStopBtn" title="Auto Stop at Critical Moments"><i class="fas fa-exclamation-triangle"></i></button>
+            <button id="boundingBoxBtn" title="Toggle Bounding Box"><i class="fas fa-border-style"></i></button>
             <span id="speedDisplay">Speed: 1.0</span>
+            <span id="deltaTDisplay">Delta T: 0.1</span>
             <span id="sizeDisplay">Size: 800 x 600</span>
         </div>
         <div class="presets">
@@ -31,6 +33,9 @@
             <button id="preset3Btn" title="Stable Orbit 3" class="preset-btn">3</button>
             <button id="preset4Btn" title="Stable Orbit 4" class="preset-btn">4</button>
             <button id="preset5Btn" title="Stable Orbit 5" class="preset-btn">5</button>
+            <button id="preset6Btn" title="Euler's Collinear Solutions" class="preset-btn">6</button>
+            <button id="preset7Btn" title="Lagrange's Equilateral Triangle" class="preset-btn">7</button>
+            <button id="preset8Btn" title="Figure-8 Orbit" class="preset-btn">8</button>
         </div>
     </div>
     <div id="settingsModal" class="modal">
@@ -43,6 +48,7 @@
             <button id="applySettingsBtn">Apply</button>
         </div>
     </div>
+    <script src="presets.js"></script>
     <script src="simulation.js"></script>
     <script src="settings.js"></script>
     <script src="buttons.js"></script>

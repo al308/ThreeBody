@@ -48,6 +48,11 @@ document.getElementById('autoStopBtn').addEventListener('click', () => {
     }
 });
 
+document.getElementById('boundingBoxBtn').addEventListener('click', () => {
+    boundingBox = !boundingBox;
+    document.getElementById('boundingBoxBtn').classList.toggle('activated');
+});
+
 document.getElementById('preset1Btn').addEventListener('click', () => {
     initBodies(1);
 });
@@ -66,6 +71,18 @@ document.getElementById('preset4Btn').addEventListener('click', () => {
 
 document.getElementById('preset5Btn').addEventListener('click', () => {
     initBodies(5);
+});
+
+document.getElementById('preset6Btn').addEventListener('click', () => {
+    initBodies(6);
+});
+
+document.getElementById('preset7Btn').addEventListener('click', () => {
+    initBodies(7);
+});
+
+document.getElementById('preset8Btn').addEventListener('click', () => {
+    initBodies(8);
 });
 
 canvas.addEventListener('mousedown', (e) => {

@@ -59,6 +59,10 @@ canvas {
     background-color: #c0392b;
 }
 
+#boundingBoxBtn.activated {
+    background-color: #27ae60;
+}
+
 #speedDisplay,
 #sizeDisplay {
     margin-left: 15px;
