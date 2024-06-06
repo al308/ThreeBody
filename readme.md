@@ -29,8 +29,8 @@ This project simulates the three-body problem using HTML, CSS, and JavaScript. T
 1. **Clone the Repository**
 
     ```sh
-    git clone <repository-url>
-    cd <repository-folder>
+    git clone [<repository-url>]
+    cd [<repository-url>]
     ```
 
 2. **Install Dependencies**
