@@ -119,3 +119,4 @@ canvas.addEventListener('mouseleave', () => {
     isDragging = false;
     selectedBody = null;
 });
+

@@ -27,7 +27,9 @@
             <span id="deltaTDisplay">Delta T: 0.1</span>
             <span id="sizeDisplay">Size: 800 x 600</span>
         </div>
-        <div class="presets">
+        <!-- Scenario Buttons -->
+        <div class="presets" id="scenarioButtons">
+           
             <button id="preset1Btn" title="Stable Orbit 1" class="preset-btn">1</button>
             <button id="preset2Btn" title="Stable Orbit 2" class="preset-btn">2</button>
             <button id="preset3Btn" title="Stable Orbit 3" class="preset-btn">3</button>
@@ -35,7 +37,11 @@
             <button id="preset5Btn" title="Stable Orbit 5" class="preset-btn">5</button>
             <button id="preset6Btn" title="Euler's Collinear Solutions" class="preset-btn">6</button>
             <button id="preset7Btn" title="Lagrange's Equilateral Triangle" class="preset-btn">7</button>
-            <button id="preset8Btn" title="Figure-8 Orbit" class="preset-btn">8</button>
+            <button id="preset8Btn" title="Figure-8 Orbit" class="preset-btn">8</button> 
+            <br>
+            <br>
+            <button id="helpBtn"  class="preset-btn">?</button>
+           
         </div>
     </div>
     <div id="settingsModal" class="modal">
@@ -48,6 +54,65 @@
             <button id="applySettingsBtn">Apply</button>
         </div>
     </div>
+
+    <!-- Help Button -->
+
+
+<!-- Help Modal -->
+<div id="helpModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Welcome to the Three-Body Problem Simulation</h2>
+        <p>
+            The three-body problem is a classical problem in physics and mathematics that involves predicting the motion of three celestial bodies based on their mutual gravitational attraction. This simulation allows you to explore various scenarios of the three-body problem.
+        </p>
+        <h3>Simulation</h3>
+        <p>
+            The simulation visualizes the motion of three bodies under the influence of gravity. You can start, stop, and reset the simulation using the buttons provided. You can also adjust the simulation speed and zoom in/out to get a better view of the motion.
+        </p>
+        <h3>Scenarios</h3>
+        <p>
+            The simulation includes several predefined scenarios:
+            <ul>
+                <li><strong>Scenario 1: Stable Orbit 1</strong> - Three bodies in a stable orbit.</li>
+                <li><strong>Scenario 2: Stable Orbit 2</strong> - Another configuration of three bodies in a stable orbit.</li>
+                <li><strong>Scenario 3: Stable Orbit 3</strong> - Yet another stable orbit configuration.</li>
+                <li><strong>Scenario 4: Stable Orbit 4</strong> - A different stable orbit setup.</li>
+                <li><strong>Scenario 5: Stable Orbit 5</strong> - A fifth stable orbit configuration.</li>
+                <li><strong>Scenario 6: Euler's Collinear Solutions</strong> - Three bodies aligned in a straight line.</li>
+                <li><strong>Scenario 7: Lagrange's Equilateral Triangle</strong> - Three bodies forming an equilateral triangle.</li>
+                <li><strong>Scenario 8: Figure-8 Orbit</strong> - Three bodies following a figure-8 path.</li>
+            </ul>
+        </p>
+        <h3>Buttons</h3>
+        <p>
+            <ul>
+                <li><strong>Start/Stop</strong> - Start or stop the simulation.</li>
+                <li><strong>Reset</strong> - Reset the simulation to the initial state.</li>
+                <li><strong>Speed Up/Down</strong> - Increase or decrease the simulation speed.</li>
+                <li><strong>Zoom In/Out</strong> - Zoom in or out of the simulation view.</li>
+                <li><strong>Auto Stop</strong> - Automatically stop the simulation when certain conditions are met.</li>
+                <li><strong>Bounding Box</strong> - Toggle the bounding box for the simulation area.</li>
+            </ul>
+        </p>
+    </div>
+</div>
+    <script>
+        document.getElementById('helpBtn').addEventListener('click', () => {
+        document.getElementById('helpModal').style.display = 'block';
+    });
+
+    document.querySelector('.close').addEventListener('click', () => {
+        document.getElementById('helpModal').style.display = 'none';
+    });
+
+    window.onclick = function(event) {
+        const helpModal = document.getElementById('helpModal');
+        if (event.target === helpModal) {
+            helpModal.style.display = 'none';
+        }
+    };
+    </script>
     <script src="presets.js"></script>
     <script src="simulation.js"></script>
     <script src="settings.js"></script>

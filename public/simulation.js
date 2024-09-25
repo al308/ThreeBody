@@ -147,6 +147,22 @@ class Body {
         const dy = screenY - mouseY;
         return dx * dx + dy * dy <= radius * radius;
     }
+
+    calculateGravitationalForce(otherBody) {
+        const G = 1;
+        const dx = otherBody.x - this.x;
+        const dy = otherBody.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance === 0) {
+            return { fx: 0, fy: 0 };
+        }
+        const force = (G * this.mass * otherBody.mass) / (distance * distance);
+        const angle = Math.atan2(dy, dx);
+        return {
+            fx: force * Math.cos(angle),
+            fy: force * Math.sin(angle)
+        };
+    }
 }
 
 function calculateGravitationalForce(b1, b2) {
@@ -175,17 +191,34 @@ function initBodies(preset) {
 
 function updateSimulation() {
     if (running) {
+        let minDistance = Infinity;
+
+        // Calculate forces and find the minimum distance between bodies
         for (let i = 0; i < bodies.length; i++) {
             for (let j = 0; j < bodies.length; j++) {
                 if (i !== j) {
-                    const force = calculateGravitationalForce(bodies[i], bodies[j]);
+                    const force = bodies[i].calculateGravitationalForce(bodies[j]);
                     bodies[i].applyForce(force.fx, force.fy);
+
+                    const dx = bodies[j].x - bodies[i].x;
+                    const dy = bodies[j].y - bodies[i].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                    }
                 }
             }
         }
 
+        // Adjust deltaT based on the minimum distance
+        const minDistanceThreshold = 50; // Adjust this threshold as needed
+        const maxDeltaT = 0.1; // Maximum deltaT
+        const minDeltaT = 0.01; // Minimum deltaT for close bodies
+        const upperBoundDeltaT = 5;
+        deltaT = Math.min(upperBoundDeltaT, Math.max(minDeltaT, maxDeltaT * (minDistance / minDistanceThreshold)));
+
         for (const body of bodies) {
-            body.update(deltaT * timeFactor); // Use deltaT for updates
+            body.update(deltaT * timeFactor); // Use adjusted deltaT for updates
         }
 
         // Update trails only when running
